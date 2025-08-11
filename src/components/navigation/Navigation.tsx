@@ -2,69 +2,65 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
-  BarChart3, 
-  TrendingUp, 
+  BarChart3,
+  CreditCard,
   Users, 
-  Package, 
-  DollarSign,
-  Brain,
-  FileText,
+  MessageSquare,
+  Package,
+  TrendingUp,
+  Shield,
   Settings,
-  Home,
   Menu,
   X
 } from "lucide-react"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
+import { UserProfile } from "@/components/dashboard/UserProfile"
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navigationItems = [
     {
-      title: "ภาพรวม",
+      title: "Dashboard",
       href: "/",
-      icon: <Home className="h-4 w-4" />,
+      icon: <BarChart3 className="h-4 w-4" />,
       active: true
     },
     {
-      title: "วิเคราะห์สินค้า",
-      href: "/products",
-      icon: <Package className="h-4 w-4" />,
-      badge: "New"
+      title: "Payment",
+      href: "/payment",
+      icon: <CreditCard className="h-4 w-4" />
     },
     {
-      title: "วิเคราะห์ลูกค้า",
+      title: "Customers",
       href: "/customers",
       icon: <Users className="h-4 w-4" />
     },
     {
-      title: "วิเคราะห์กำไร",
-      href: "/profitability",
-      icon: <DollarSign className="h-4 w-4" />
+      title: "Message",
+      href: "/message",
+      icon: <MessageSquare className="h-4 w-4" />
     },
     {
-      title: "ประสิทธิภาพทีม",
-      href: "/performance",
-      icon: <BarChart3 className="h-4 w-4" />
+      title: "Product",
+      href: "/product",
+      icon: <Package className="h-4 w-4" />
     },
     {
-      title: "การคาดการณ์",
-      href: "/forecasting",
-      icon: <TrendingUp className="h-4 w-4" />,
-      badge: "AI"
+      title: "Analysis",
+      href: "/analysis",
+      icon: <TrendingUp className="h-4 w-4" />
+    }
+  ]
+
+  const accountItems = [
+    {
+      title: "Security",
+      href: "/security",
+      icon: <Shield className="h-4 w-4" />
     },
     {
-      title: "AI Insights",
-      href: "/ai-insights",
-      icon: <Brain className="h-4 w-4" />,
-      badge: "Beta"
-    },
-    {
-      title: "รายงาน",
-      href: "/reports",
-      icon: <FileText className="h-4 w-4" />
-    },
-    {
-      title: "ตั้งค่า",
+      title: "Setting",
       href: "/settings",
       icon: <Settings className="h-4 w-4" />
     }
@@ -90,55 +86,68 @@ export function Navigation() {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:z-auto
       `}>
-        <div className="p-6">
+        <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="font-bold text-lg">Analytics</h2>
-              <p className="text-xs text-muted-foreground">Sales Dashboard</p>
+          <div className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="font-bold text-lg">Sales UI</h2>
+              </div>
             </div>
           </div>
 
-          {/* Navigation items */}
-          <div className="space-y-2">
-            {navigationItems.map((item, index) => (
-              <Button
-                key={index}
-                variant={item.active ? "default" : "ghost"}
-                className={`
-                  w-full justify-start gap-3 h-10
-                  ${item.active ? 'bg-gradient-primary text-primary-foreground' : 'hover:bg-muted'}
-                `}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.icon}
-                <span className="flex-1 text-left">{item.title}</span>
-                {item.badge && (
-                  <Badge 
-                    variant={item.badge === "AI" ? "default" : "secondary"} 
-                    className="text-xs"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-              </Button>
-            ))}
+          {/* Main Menu */}
+          <div className="px-6 flex-1">
+            <div className="space-y-1">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Main Menu
+              </h3>
+              {navigationItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant={item.active ? "default" : "ghost"}
+                  className={`
+                    w-full justify-start gap-3 h-10 text-left
+                    ${item.active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}
+                  `}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* Account Section */}
+            <div className="space-y-1 mt-8">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Account
+              </h3>
+              {accountItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  className="w-full justify-start gap-3 h-10 text-left text-muted-foreground hover:text-foreground hover:bg-muted"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* Upgrade Card */}
+            <div className="mt-8">
+              <UpgradeCard />
+            </div>
           </div>
 
-          {/* Bottom section */}
-          <div className="absolute bottom-6 left-6 right-6">
-            <div className="p-4 rounded-lg bg-gradient-secondary border border-card-border">
-              <h4 className="font-medium text-sm mb-1">ขยายฟีเจอร์</h4>
-              <p className="text-xs text-muted-foreground mb-3">
-                อัพเกรดเพื่อใช้ AI Analytics เต็มรูปแบบ
-              </p>
-              <Button size="sm" className="w-full bg-gradient-primary">
-                อัพเกรด
-              </Button>
-            </div>
+          {/* User Profile */}
+          <div className="border-t border-card-border">
+            <UserProfile />
           </div>
         </div>
       </nav>
