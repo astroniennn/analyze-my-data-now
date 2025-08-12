@@ -1,6 +1,11 @@
+ feature/sales-dashboard-foundation
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+=======
+import { render } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+ main
 import { DataInput } from './DataInput';
 import { DataProvider } from '@/context/DataContext';
 
@@ -24,12 +29,13 @@ describe('DataInput', () => {
   });
 
   it('renders the component correctly', () => {
-    render(
+    const { getByText } = render(
       <DataProvider>
         <DataInput />
       </DataProvider>
     );
 
+ feature/sales-dashboard-foundation
     expect(screen.getByText('Import Data')).toBeInTheDocument();
     expect(screen.getByText('Upload your Excel or CSV file to get started.')).toBeInTheDocument();
     expect(screen.getByRole('button')).toBeInTheDocument();
@@ -64,5 +70,12 @@ describe('DataInput', () => {
       Cost: '60',
       Date: '2023-01-15'
     });
+
+    // Check for the title
+    expect(getByText(/นำเข้าข้อมูลและบันทึกลง Supabase/)).toBeInTheDocument();
+
+    // Check for the instructional text
+    expect(getByText(/รองรับไฟล์: Excel/)).toBeInTheDocument();
+ main
   });
 });
