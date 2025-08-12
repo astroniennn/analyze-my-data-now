@@ -15,17 +15,15 @@ const Index = () => {
     }
 
     const sales = filteredData.reduce((acc, row) => {
-      const sale = parseFloat(row.Sales);
-      return acc + (isNaN(sale) ? 0 : sale);
+      // Data is already a number from the transformation step
+      const sale = row.total_price || 0;
+      return acc + sale;
     }, 0);
 
     const profit = filteredData.reduce((acc, row) => {
-      const sale = parseFloat(row.Sales);
-      const cost = parseFloat(row.Cost);
-      if (!isNaN(sale) && !isNaN(cost)) {
-        return acc + (sale - cost);
-      }
-      return acc;
+      const sale = row.total_price || 0;
+      const cost = row.cost || 0;
+      return acc + (sale - cost);
     }, 0);
 
     return { totalSales: sales, totalProfit: profit };

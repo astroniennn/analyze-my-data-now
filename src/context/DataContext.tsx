@@ -6,7 +6,7 @@ interface DataContextType {
   rawData: any[];
   filteredData: any[];
   dateRange: DateRange | undefined;
-  setRawData: (data: any[]) => void;
+  setRawData: React.Dispatch<React.SetStateAction<any[]>>;
   setDateRange: (dateRange: DateRange | undefined) => void;
 }
 
@@ -18,13 +18,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [rawData, setRawDataState] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  // Basic data processing placeholder
-  const processAndSetData = (newData: any[]) => {
-    const processedData = newData.filter(row =>
-      Object.values(row).some(val => val !== null && val !== '')
-    );
-    setRawDataState(processedData);
-    console.log("Processed and set new raw data:", processedData);
+  // This setter can now handle both direct data arrays and updater functions
+  const processAndSetData = (value: React.SetStateAction<any[]>) => {
+    setRawDataState(currentData => {
+      const newData = typeof value === 'function' ? value(currentData) : value;
+      // Filter out empty rows from the final new data
+      const processedData = newData.filter(row =>
+        row && Object.values(row).some(val => val !== null && val !== '')
+      );
+      console.log("Processed and set new raw data:", processedData);
+      return processedData;
+    });
   };
 
   // Memoized filtered data
