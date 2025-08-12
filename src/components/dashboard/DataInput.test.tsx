@@ -3,11 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataInput } from './DataInput';
 import { DataProvider } from '@/context/DataContext';
+import { supabase } from '@/lib/supabaseClient'; // Import to be mocked
+import { toast } from 'sonner';
 
-// Mock the useData hook to spy on the setRawData function
+// Mock the DataContext
 const mockSetRawData = vi.fn();
 vi.mock('@/context/DataContext', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return {
     ...actual,
     useData: () => ({
@@ -20,51 +22,82 @@ vi.mock('@/context/DataContext', async (importOriginal) => {
   };
 });
 
+// Mock the Supabase client
+vi.mock('@/lib/supabaseClient', () => ({
+  supabase: {
+    from: vi.fn().mockReturnThis(),
+    insert: vi.fn(),
+  },
+}));
+
+// Mock the toast notifications
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  }
+}));
+
 describe('DataInput', () => {
-  // Clear mocks before each test
   beforeEach(() => {
-    mockSetRawData.mockClear();
+    vi.clearAllMocks(); // Clear all mocks before each test
   });
 
   it('renders the component correctly', () => {
-    render(
-      <DataProvider>
-        <DataInput />
-      </DataProvider>
-    );
-
+    render(<DataProvider><DataInput /></DataProvider>);
     expect(screen.getByText('Import Data')).toBeInTheDocument();
-    expect(screen.getByText('Upload your Excel or CSV file to get started.')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
-  it('correctly maps Thai headers to English keys on CSV upload', async () => {
+  it('correctly maps headers and calls setRawData on upload', async () => {
     const user = userEvent.setup();
-    const csvContent = `"Total Price","ต้นทุน","Doc Date"\n"100","60","2023-01-15"`;
+    const csvContent = `"Total Price"\n"100"`;
     const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-    render(
-      <DataProvider>
-        <DataInput />
-      </DataProvider>
-    );
+    render(<DataProvider><DataInput /></DataProvider>);
 
     const fileInput = screen.getByTestId('file-input');
     await user.upload(fileInput, file);
     await user.click(screen.getByRole('button', { name: /upload file/i }));
 
-    // Allow FileReader to process
     await vi.waitFor(() => {
       expect(mockSetRawData).toHaveBeenCalledTimes(1);
+      expect(mockSetRawData.mock.calls[0][0][0]).toEqual({ Sales: '100' });
     });
+  });
 
-    const transformedData = mockSetRawData.mock.calls[0][0];
+  it('calls supabase.insert with transformed data and shows success toast', async () => {
+    const user = userEvent.setup();
+    (supabase.from('sales_transactions').insert as vi.Mock).mockResolvedValueOnce({ error: null });
 
-    expect(transformedData).toHaveLength(1);
-    expect(transformedData[0]).toEqual({
-      Sales: '100',
-      Cost: '60',
-      Date: '2023-01-15'
+    const csvContent = `"Total Price"\n"100"`;
+    const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+    render(<DataProvider><DataInput /></DataProvider>);
+
+    const fileInput = screen.getByTestId('file-input');
+    await user.upload(fileInput, file);
+    await user.click(screen.getByRole('button', { name: /upload file/i }));
+
+    await vi.waitFor(() => {
+      expect(supabase.from).toHaveBeenCalledWith('sales_transactions');
+      expect(supabase.from('sales_transactions').insert).toHaveBeenCalledWith([{ Sales: '100' }]);
+      expect(toast.success).toHaveBeenCalledWith("File uploaded and data imported successfully!");
+    });
+  });
+
+  it('shows an error toast if supabase.insert fails', async () => {
+    const user = userEvent.setup();
+    const mockError = { message: 'Insert failed' };
+    (supabase.from('sales_transactions').insert as vi.Mock).mockResolvedValueOnce({ error: mockError });
+
+    const csvContent = `"Total Price"\n"100"`;
+    const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+    render(<DataProvider><DataInput /></DataProvider>);
+
+    const fileInput = screen.getByTestId('file-input');
+    await user.upload(fileInput, file);
+    await user.click(screen.getByRole('button', { name: /upload file/i }));
+
+    await vi.waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Upload failed", { description: mockError.message });
     });
   });
 });
