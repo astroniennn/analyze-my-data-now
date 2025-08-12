@@ -19,9 +19,10 @@ export function SalesStatistic({ salesData }: SalesStatisticProps) {
     const salesByMonth: { [key: string]: number } = {};
 
     salesData.forEach(row => {
-      const date = new Date(row.Date);
-      const sale = parseFloat(row.Sales);
-      if (!isNaN(date.getTime()) && !isNaN(sale)) {
+      // Data is already typed from the transformation step
+      const date = new Date(row.doc_date);
+      const sale = row.total_price;
+      if (!isNaN(date.getTime()) && typeof sale === 'number') {
         const month = date.toLocaleString('default', { month: 'short' });
         salesByMonth[month] = (salesByMonth[month] || 0) + sale;
       }
