@@ -19,27 +19,35 @@ const headerMapping: { [key:string]: string } = {
 
 const transformRow = (row: any) => {
   const newRow: { [key: string]: any } = {};
-  for (const key in row) {
-    const newKey = headerMapping[key.trim()] || key.trim();
-    const value = row[key];
-    switch (newKey) {
-      case 'total_price': case 'cost': case 'bill_sale_price': case 'unit_sale_price':
-        newRow[newKey] = parseFloat(value) || null;
-        break;
-      case 'doc_date':
-        if (!value) { newRow[newKey] = null; break; }
-        const date = new Date(value);
-        if (!isNaN(value) && Math.abs(value) < 400000) {
-           const excelEpoch = new Date(1899, 11, 30);
-           const correctDate = new Date(excelEpoch.getTime() + value * 24 * 60 * 60 * 1000);
-           newRow[newKey] = isNaN(correctDate.getTime()) ? null : correctDate.toISOString();
-        } else {
-           newRow[newKey] = isNaN(date.getTime()) ? null : date.toISOString();
-        }
-        break;
-      default:
-        newRow[newKey] = value;
-        break;
+  // Iterate over the defined mapping to only include known columns.
+  // This acts as a whitelist, ignoring junk columns like '2025-Table 1'.
+  for (const csvHeader in headerMapping) {
+    if (row.hasOwnProperty(csvHeader)) {
+      const supabaseColumn = headerMapping[csvHeader];
+      const value = row[csvHeader];
+
+      switch (supabaseColumn) {
+        case 'total_price':
+        case 'cost':
+        case 'bill_sale_price':
+        case 'unit_sale_price':
+          newRow[supabaseColumn] = parseFloat(value) || null;
+          break;
+        case 'doc_date':
+          if (!value) { newRow[supabaseColumn] = null; break; }
+          const date = new Date(value);
+          if (!isNaN(value) && Math.abs(value) < 400000) {
+             const excelEpoch = new Date(1899, 11, 30);
+             const correctDate = new Date(excelEpoch.getTime() + value * 24 * 60 * 60 * 1000);
+             newRow[supabaseColumn] = isNaN(correctDate.getTime()) ? null : correctDate.toISOString();
+          } else {
+             newRow[supabaseColumn] = isNaN(date.getTime()) ? null : date.toISOString();
+          }
+          break;
+        default:
+          newRow[supabaseColumn] = value;
+          break;
+      }
     }
   }
   return newRow;
