@@ -14,48 +14,198 @@ export type Database = {
   }
   public: {
     Tables: {
-      sales: {
+      sales_transactions: {
         Row: {
+          approve: boolean | null
+          bill_sale_price: number | null
+          branch_id: string | null
+          branch_name: string | null
+          brand: string | null
+          buy_bill: string | null
+          buy_doc_ref: string | null
+          category_id: string | null
+          category_name: string | null
+          comment: string | null
+          cost: number | null
+          cost_after_debt_reduction: number | null
+          counter: number | null
+          cr_off_id: string | null
+          cr_off_name: string | null
+          create_time: string
           created_at: string
+          credit_days: number | null
+          cus_ref: string | null
+          customer_code: string | null
           customer_name: string | null
+          diff_cost: number | null
+          diff_cost_after_debt_reduction: number | null
+          diff_set: number | null
+          discount: number | null
+          discount_value: number | null
+          doc_date: string | null
+          doc_no: string | null
+          doc_ref: string | null
+          finish: string | null
           id: string
-          notes: string | null
-          product: string | null
-          quantity: number
-          sale_date: string
-          status: string
-          total_amount: number | null
-          unit_price: number
+          model: string | null
+          number: number | null
+          officer_id: string | null
+          officer_name: string | null
+          product_code: string | null
+          product_name: string | null
+          product_type: string | null
+          profit_sale_price: number | null
+          replicate_time: string | null
+          sell_type: string | null
+          serial: string | null
+          set_price: number | null
+          set_product_code: string | null
+          set_product_name: string | null
+          set_product_serial: string | null
+          status: string | null
+          sub_category: string | null
+          sum_number: number | null
+          supplier_code: string | null
+          supplier_name: string | null
+          total_price: number | null
+          unit_sale_price: number | null
+          uoff_id: string | null
+          uoff_name: string | null
+          update_time: string
           updated_at: string
           user_id: string
+          vat_percentage: number | null
+          vat_type: string | null
+          vat_value: number | null
+          version: string | null
         }
         Insert: {
+          approve?: boolean | null
+          bill_sale_price?: number | null
+          branch_id?: string | null
+          branch_name?: string | null
+          brand?: string | null
+          buy_bill?: string | null
+          buy_doc_ref?: string | null
+          category_id?: string | null
+          category_name?: string | null
+          comment?: string | null
+          cost?: number | null
+          cost_after_debt_reduction?: number | null
+          counter?: number | null
+          cr_off_id?: string | null
+          cr_off_name?: string | null
+          create_time?: string
           created_at?: string
+          credit_days?: number | null
+          cus_ref?: string | null
+          customer_code?: string | null
           customer_name?: string | null
+          diff_cost?: number | null
+          diff_cost_after_debt_reduction?: number | null
+          diff_set?: number | null
+          discount?: number | null
+          discount_value?: number | null
+          doc_date?: string | null
+          doc_no?: string | null
+          doc_ref?: string | null
+          finish?: string | null
           id?: string
-          notes?: string | null
-          product?: string | null
-          quantity?: number
-          sale_date?: string
-          status?: string
-          total_amount?: number | null
-          unit_price?: number
+          model?: string | null
+          number?: number | null
+          officer_id?: string | null
+          officer_name?: string | null
+          product_code?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          profit_sale_price?: number | null
+          replicate_time?: string | null
+          sell_type?: string | null
+          serial?: string | null
+          set_price?: number | null
+          set_product_code?: string | null
+          set_product_name?: string | null
+          set_product_serial?: string | null
+          status?: string | null
+          sub_category?: string | null
+          sum_number?: number | null
+          supplier_code?: string | null
+          supplier_name?: string | null
+          total_price?: number | null
+          unit_sale_price?: number | null
+          uoff_id?: string | null
+          uoff_name?: string | null
+          update_time?: string
           updated_at?: string
           user_id: string
+          vat_percentage?: number | null
+          vat_type?: string | null
+          vat_value?: number | null
+          version?: string | null
         }
         Update: {
+          approve?: boolean | null
+          bill_sale_price?: number | null
+          branch_id?: string | null
+          branch_name?: string | null
+          brand?: string | null
+          buy_bill?: string | null
+          buy_doc_ref?: string | null
+          category_id?: string | null
+          category_name?: string | null
+          comment?: string | null
+          cost?: number | null
+          cost_after_debt_reduction?: number | null
+          counter?: number | null
+          cr_off_id?: string | null
+          cr_off_name?: string | null
+          create_time?: string
           created_at?: string
+          credit_days?: number | null
+          cus_ref?: string | null
+          customer_code?: string | null
           customer_name?: string | null
+          diff_cost?: number | null
+          diff_cost_after_debt_reduction?: number | null
+          diff_set?: number | null
+          discount?: number | null
+          discount_value?: number | null
+          doc_date?: string | null
+          doc_no?: string | null
+          doc_ref?: string | null
+          finish?: string | null
           id?: string
-          notes?: string | null
-          product?: string | null
-          quantity?: number
-          sale_date?: string
-          status?: string
-          total_amount?: number | null
-          unit_price?: number
+          model?: string | null
+          number?: number | null
+          officer_id?: string | null
+          officer_name?: string | null
+          product_code?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          profit_sale_price?: number | null
+          replicate_time?: string | null
+          sell_type?: string | null
+          serial?: string | null
+          set_price?: number | null
+          set_product_code?: string | null
+          set_product_name?: string | null
+          set_product_serial?: string | null
+          status?: string | null
+          sub_category?: string | null
+          sum_number?: number | null
+          supplier_code?: string | null
+          supplier_name?: string | null
+          total_price?: number | null
+          unit_sale_price?: number | null
+          uoff_id?: string | null
+          uoff_name?: string | null
+          update_time?: string
           updated_at?: string
           user_id?: string
+          vat_percentage?: number | null
+          vat_type?: string | null
+          vat_value?: number | null
+          version?: string | null
         }
         Relationships: []
       }
