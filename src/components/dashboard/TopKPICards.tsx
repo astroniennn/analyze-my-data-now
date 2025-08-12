@@ -1,32 +1,42 @@
-import { StatCard } from "@/components/ui/stat-card"
-import { DollarSign, ShoppingCart, Package } from "lucide-react"
+import { StatCard } from "@/components/ui/stat-card";
 
-export function TopKPICards() {
+interface TopKPICardsProps {
+  totalSales: number;
+  totalProfit: number;
+}
+
+export function TopKPICards({ totalSales, totalProfit }: TopKPICardsProps) {
+  const profitMargin = totalSales > 0 ? (totalProfit / totalSales) * 100 : 0;
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <StatCard
-        title="Total Amount"
-        value="$76,243.20"
-        change={{ value: "40%", type: "increase" }}
-        subtitle="last month"
-        className="bg-card shadow-card"
-      />
-      
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <StatCard
         title="Total Sales"
-        value="$21,432.80"
-        change={{ value: "40%", type: "decrease" }}
-        subtitle="last month"
+        value={formatCurrency(totalSales)}
+        subtitle="All time"
         className="bg-card shadow-card"
       />
       
       <StatCard
-        title="Total Order"
-        value="12,472.10"
-        change={{ value: "40%", type: "increase" }}
-        subtitle="last month"
+        title="Total Profit"
+        value={formatCurrency(totalProfit)}
+        subtitle="All time"
+        className="bg-card shadow-card"
+      />
+      
+      <StatCard
+        title="Profit Margin"
+        value={`${profitMargin.toFixed(2)}%`}
+        subtitle="All time"
         className="bg-card shadow-card"
       />
     </div>
-  )
+  );
 }

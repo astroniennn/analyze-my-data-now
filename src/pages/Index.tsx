@@ -1,12 +1,35 @@
-import { Navigation } from "@/components/navigation/Navigation"
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
-import { TopKPICards } from "@/components/dashboard/TopKPICards"
-import { SalesStatistic } from "@/components/dashboard/SalesStatistic"
-import { TrafficSources } from "@/components/dashboard/TrafficSources"
-import { ProductList } from "@/components/dashboard/ProductList"
-import { SalesDistribution } from "@/components/dashboard/SalesDistribution"
+import { useMemo } from "react";
+import { Navigation } from "@/components/navigation/Navigation";
+import { DataInput } from "@/components/dashboard/DataInput";
+import { TopKPICards } from "@/components/dashboard/TopKPICards";
+import { SalesStatistic } from "@/components/dashboard/SalesStatistic";
+import { useData } from "@/context/DataContext";
 
 const Index = () => {
+  const { data } = useData();
+
+  const { totalSales, totalProfit } = useMemo(() => {
+    if (!data || data.length === 0) {
+      return { totalSales: 0, totalProfit: 0 };
+    }
+
+    const sales = data.reduce((acc, row) => {
+      const sale = parseFloat(row.Sales);
+      return acc + (isNaN(sale) ? 0 : sale);
+    }, 0);
+
+    const profit = data.reduce((acc, row) => {
+      const sale = parseFloat(row.Sales);
+      const cost = parseFloat(row.Cost);
+      if (!isNaN(sale) && !isNaN(cost)) {
+        return acc + (sale - cost);
+      }
+      return acc;
+    }, 0);
+
+    return { totalSales: sales, totalProfit: profit };
+  }, [data]);
+
   return (
     <div className="min-h-screen bg-gradient-background">
       <Navigation />
@@ -14,22 +37,27 @@ const Index = () => {
       {/* Main content */}
       <div className="lg:ml-64 min-h-screen">
         <div className="p-6">
-          {/* Header */}
-          <DashboardHeader />
-          
-          {/* Top KPI Cards */}
-          <TopKPICards />
-          
-          {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <SalesStatistic />
-            <TrafficSources />
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-white">Sales Dashboard</h1>
           </div>
 
-          {/* Bottom Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProductList />
-            <SalesDistribution />
+          <div className="space-y-6">
+            <DataInput />
+
+            {/* Render dashboard only if there is data */}
+            {data && data.length > 0 ? (
+              <>
+                <TopKPICards
+                  totalSales={totalSales}
+                  totalProfit={totalProfit}
+                />
+                <SalesStatistic salesData={data} />
+              </>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Upload a file to see your dashboard.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
