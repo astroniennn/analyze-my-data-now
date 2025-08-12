@@ -2,10 +2,12 @@ import { useState, ChangeEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { useData } from "@/context/DataContext";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 // Define the mapping from Thai headers to English keys
 const headerMapping: { [key: string]: string } = {
@@ -20,6 +22,7 @@ const headerMapping: { [key: string]: string } = {
 
 export const DataInput = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { setRawData } = useData();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -28,39 +31,64 @@ export const DataInput = () => {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) {
-      alert("Please select a file first!");
+      toast.error("Please select a file first!");
       return;
     }
+    setIsLoading(true);
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const binaryStr = event.target?.result;
+    reader.onload = async (event) => {
+      try {
+        const binaryStr = event.target?.result;
+        let parsedData: any[] = [];
 
-      let parsedData: any[] = [];
-
-      if (file.name.endsWith(".csv")) {
-        const result = Papa.parse(binaryStr as string, { header: true });
-        parsedData = result.data;
-      } else {
-        const workbook = XLSX.read(binaryStr, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        parsedData = XLSX.utils.sheet_to_json(worksheet);
-      }
-
-      // Transform the data by mapping headers
-      const transformedData = parsedData.map(row => {
-        const newRow: { [key: string]: any } = {};
-        for (const key in row) {
-          const newKey = headerMapping[key.trim()] || key.trim();
-          newRow[newKey] = row[key];
+        if (file.name.endsWith(".csv")) {
+          const result = Papa.parse(binaryStr as string, { header: true, skipEmptyLines: true });
+          parsedData = result.data;
+        } else {
+          const workbook = XLSX.read(binaryStr, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          parsedData = XLSX.utils.sheet_to_json(worksheet);
         }
-        return newRow;
-      });
 
-      setRawData(transformedData);
+        const transformedData = parsedData.map(row => {
+          const newRow: { [key: string]: any } = {};
+          for (const key in row) {
+            const newKey = headerMapping[key.trim()] || key.trim();
+            newRow[newKey] = row[key];
+          }
+          return newRow;
+        });
+
+        // Also set data for local dashboard view
+        setRawData(transformedData);
+
+        // Upload to Supabase
+        const { error } = await supabase
+          .from('sales_transactions')
+          .insert(transformedData);
+
+        if (error) {
+          throw error;
+        }
+
+        toast.success("File uploaded and data imported successfully!");
+
+      } catch (error: any) {
+        toast.error("Upload failed", {
+          description: error.message,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    reader.onerror = () => {
+        toast.error("Failed to read the file.");
+        setIsLoading(false);
     };
 
     if (file.name.endsWith(".csv")) {
@@ -82,9 +110,10 @@ export const DataInput = () => {
             type="file"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             onChange={handleFileChange}
+            disabled={isLoading}
           />
-          <Button size="icon" onClick={handleUpload} aria-label="Upload file">
-            <Upload className="h-4 w-4" />
+          <Button size="icon" onClick={handleUpload} aria-label="Upload file" disabled={isLoading}>
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           </Button>
         </div>
         <p className="text-sm text-muted-foreground mt-2">
