@@ -58,7 +58,29 @@ export const DataInput = () => {
           const newRow: { [key: string]: any } = {};
           for (const key in row) {
             const newKey = headerMapping[key.trim()] || key.trim();
-            newRow[newKey] = row[key];
+            const value = row[key];
+
+            // Type casting based on the new key
+            switch (newKey) {
+              case 'Sales':
+              case 'Cost':
+                newRow[newKey] = parseFloat(value) || null;
+                break;
+              case 'Date':
+                const date = new Date(value);
+                // Handle Excel's integer date format
+                if (!isNaN(value) && Math.abs(value) < 400000) {
+                   const excelEpoch = new Date(1899, 11, 30);
+                   const correctDate = new Date(excelEpoch.getTime() + value * 24 * 60 * 60 * 1000);
+                   newRow[newKey] = isNaN(correctDate.getTime()) ? null : correctDate.toISOString();
+                } else {
+                   newRow[newKey] = isNaN(date.getTime()) ? null : date.toISOString();
+                }
+                break;
+              default:
+                newRow[newKey] = value;
+                break;
+            }
           }
           return newRow;
         });
@@ -72,6 +94,7 @@ export const DataInput = () => {
           .insert(transformedData);
 
         if (error) {
+          console.error('Supabase error:', error); // Log the full error
           throw error;
         }
 
