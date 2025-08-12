@@ -48,9 +48,9 @@ describe('DataInput', () => {
     expect(screen.getByText('Import Data')).toBeInTheDocument();
   });
 
-  it('correctly maps headers and calls setRawData on upload', async () => {
+  it('transforms and sets data correctly on upload', async () => {
     const user = userEvent.setup();
-    const csvContent = `"Total Price"\n"100"`;
+    const csvContent = `"Total Price","ต้นทุน","Doc Date"\n"150.5","70","2023-01-15"`;
     const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
     render(<DataProvider><DataInput /></DataProvider>);
 
@@ -60,15 +60,18 @@ describe('DataInput', () => {
 
     await vi.waitFor(() => {
       expect(mockSetRawData).toHaveBeenCalledTimes(1);
-      expect(mockSetRawData.mock.calls[0][0][0]).toEqual({ Sales: '100' });
+      const data = mockSetRawData.mock.calls[0][0][0];
+      expect(data.Sales).toBe(150.5); // Check for number
+      expect(data.Cost).toBe(70); // Check for number
+      expect(data.Date).toBe(new Date('2023-01-15').toISOString()); // Check for ISO string
     });
   });
 
-  it('calls supabase.insert with transformed data and shows success toast', async () => {
+  it('calls supabase.insert with correctly typed data', async () => {
     const user = userEvent.setup();
     (supabase.from('sales_transactions').insert as vi.Mock).mockResolvedValueOnce({ error: null });
 
-    const csvContent = `"Total Price"\n"100"`;
+    const csvContent = `"Total Price","ต้นทุน","Doc Date"\n"150.5","70","2023-01-15"`;
     const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
     render(<DataProvider><DataInput /></DataProvider>);
 
@@ -77,12 +80,15 @@ describe('DataInput', () => {
     await user.click(screen.getByRole('button', { name: /upload file/i }));
 
     await vi.waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith('sales_transactions');
-      expect(supabase.from('sales_transactions').insert).toHaveBeenCalledWith([{ Sales: '100' }]);
+      const insertedData = (supabase.from('sales_transactions').insert as vi.Mock).mock.calls[0][0][0];
+      expect(insertedData.Sales).toBe(150.5);
+      expect(insertedData.Cost).toBe(70);
+      expect(insertedData.Date).toBe(new Date('2023-01-15').toISOString());
       expect(toast.success).toHaveBeenCalledWith("File uploaded and data imported successfully!");
     });
   });
 
+  // The error test doesn't need changes as it doesn't inspect the data
   it('shows an error toast if supabase.insert fails', async () => {
     const user = userEvent.setup();
     const mockError = { message: 'Insert failed' };
