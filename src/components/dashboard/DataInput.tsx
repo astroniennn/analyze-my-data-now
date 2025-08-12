@@ -32,21 +32,71 @@ export const DataInput = () => {
         return;
       }
 
-      // Transform data to match sales table structure
+      // Transform data to match sales_transactions table structure
       const salesData = data.map((row: any) => ({
         user_id: user.id,
-        product: row.Product || row.product || row.สินค้า || null,
-        customer_name: row.Customer || row.customer_name || row.ลูกค้า || null,
-        quantity: parseInt(row.Quantity || row.quantity || row.จำนวน || '1'),
-        unit_price: parseFloat(row.Price || row.unit_price || row.ราคา || '0'),
-        total_amount: parseFloat(row.Total || row.total_amount || row.รวม || row.Sales || '0'),
-        sale_date: row.Date || row.sale_date || row.วันที่ || new Date().toISOString().split('T')[0],
-        status: row.Status || row.status || row.สถานะ || 'pending',
-        notes: row.Notes || row.notes || row.หมายเหตุ || null,
+        product_code: row['Product (Code)'] || row.product_code || null,
+        product_name: row['Product (Name)'] || row.product_name || null,
+        number: parseFloat(row.Number || row.number || '0'),
+        price_for_profit: parseFloat(row['ราคาขายนำมาคิดกำไร'] || row.price_for_profit || '0'),
+        bill_price: parseFloat(row['ราคาขายตามบิล'] || row.bill_price || '0'),
+        unit_price: parseFloat(row['ราคาขาย/หน่วย'] || row.unit_price || '0'),
+        serial: row.Serial || row.serial || null,
+        sum_number: parseFloat(row['Sum Number'] || row.sum_number || '0'),
+        category_id: row['Category (ID)'] || row.category_id || null,
+        category_name: row['Category (Name)'] || row.category_name || null,
+        sub_category: row['Sub Category'] || row.sub_category || null,
+        brand: row.Brand || row.brand || null,
+        model: row.Model || row.model || null,
+        branch_id: row['Branch (ID)'] || row.branch_id || null,
+        branch_name: row['Branch (Name)'] || row.branch_name || null,
+        doc_no: row['Doc No'] || row.doc_no || null,
+        doc_ref: row['Doc Ref'] || row.doc_ref || null,
+        doc_date: row['Doc Date'] || row.doc_date || null,
+        version: row.Version || row.version || null,
+        set_price: parseFloat(row['Set Price'] || row.set_price || '0'),
+        cost: parseFloat(row['ต้นทุน'] || row.cost || '0'),
+        cost_after_discount: parseFloat(row['ต้นทุนหลังลดหนี้'] || row.cost_after_discount || '0'),
+        diff_set: parseFloat(row['Diff Set'] || row.diff_set || '0'),
+        diff_cost: parseFloat(row['Diff Cost'] || row.diff_cost || '0'),
+        diff_cost_after_discount: parseFloat(row['Diff Cost หลังลดหนี้'] || row.diff_cost_after_discount || '0'),
+        total_price: parseFloat(row['Total Price'] || row.total_price || '0'),
+        vat_percent: parseFloat(row['Vat (%)'] || row.vat_percent || '0'),
+        vat_type: row['Vat Type'] || row.vat_type || null,
+        vat_value: parseFloat(row['Vat Value'] || row.vat_value || '0'),
+        discount: parseFloat(row.Discount || row.discount || '0'),
+        discount_value: parseFloat(row['Discount Value'] || row.discount_value || '0'),
+        sell_type: row['Sell Type'] || row.sell_type || null,
+        finish: row.Finish || row.finish || null,
+        credit_days: parseInt(row['Credit (Days)'] || row.credit_days || '0'),
+        buy_bill: row['Buy Bill'] || row.buy_bill || null,
+        buy_doc_ref: row['Buy Doc Ref.'] || row.buy_doc_ref || null,
+        cus_ref: row['Cus Ref.'] || row.cus_ref || null,
+        customer_code: row['Customer (Code)'] || row.customer_code || null,
+        customer_name: row['Customer (Name)'] || row.customer_name || null,
+        supplier_code: row['Supplier (Code)'] || row.supplier_code || null,
+        supplier_name: row['Supplier (Name)'] || row.supplier_name || null,
+        officer_id: row['Officer (ID)'] || row.officer_id || null,
+        officer_name: row['Officer (Name)'] || row.officer_name || null,
+        comment: row.Comment || row.comment || null,
+        product_type: row['Product Type'] || row.product_type || null,
+        set_product_code: row['SET Product (Code)'] || row.set_product_code || null,
+        set_product_name: row['SET Product (Name)'] || row.set_product_name || null,
+        set_product_serial: row['SET Product (Serial)'] || row.set_product_serial || null,
+        approve: row.Approve || row.approve || null,
+        status: row.Status || row.status || null,
+        cr_off_id: row['Cr Off (ID)'] || row.cr_off_id || null,
+        cr_off_name: row['Cr Off (Name)'] || row.cr_off_name || null,
+        create_time: row['Create Time'] || row.create_time || null,
+        uoff_id: row['UOff (ID)'] || row.uoff_id || null,
+        uoff_name: row['UOff (Name)'] || row.uoff_name || null,
+        update_time: row['Update Time'] || row.update_time || null,
+        replicate_time: row['Replicate Time'] || row.replicate_time || null,
+        counter: parseInt(row.Counter || row.counter || '0')
       }));
 
-      const { error } = await supabase
-        .from('sales')
+      const { error } = await (supabase as any)
+        .from('sales_transactions')
         .insert(salesData);
 
       if (error) {

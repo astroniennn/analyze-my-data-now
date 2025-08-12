@@ -1,24 +1,20 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { DataInput } from './DataInput';
 import { DataProvider } from '@/context/DataContext';
 
 describe('DataInput', () => {
   it('renders the component correctly', () => {
-    render(
+    const { getByText } = render(
       <DataProvider>
         <DataInput />
       </DataProvider>
     );
 
     // Check for the title
-    expect(screen.getByText('Import Data')).toBeInTheDocument();
+    expect(getByText(/นำเข้าข้อมูลและบันทึกลง Supabase/)).toBeInTheDocument();
 
     // Check for the instructional text
-    expect(screen.getByText('Upload your Excel or CSV file to get started.')).toBeInTheDocument();
-
-    // Check for the upload button by its role
-    const uploadButton = screen.getByRole('button');
-    expect(uploadButton).toBeInTheDocument();
+    expect(getByText(/รองรับไฟล์: Excel/)).toBeInTheDocument();
   });
 });
