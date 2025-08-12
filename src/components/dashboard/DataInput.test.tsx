@@ -1,23 +1,21 @@
- feature/sales-dashboard-foundation
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-=======
-import { render } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
- main
 import { DataInput } from './DataInput';
 import { DataProvider } from '@/context/DataContext';
 
-// Mock the useData hook to spy on the setData function
-const mockSetData = vi.fn();
+// Mock the useData hook to spy on the setRawData function
+const mockSetRawData = vi.fn();
 vi.mock('@/context/DataContext', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
     useData: () => ({
-      data: [],
-      setData: mockSetData,
+      rawData: [],
+      filteredData: [],
+      dateRange: undefined,
+      setRawData: mockSetRawData,
+      setDateRange: vi.fn(),
     }),
   };
 });
@@ -25,17 +23,16 @@ vi.mock('@/context/DataContext', async (importOriginal) => {
 describe('DataInput', () => {
   // Clear mocks before each test
   beforeEach(() => {
-    mockSetData.mockClear();
+    mockSetRawData.mockClear();
   });
 
   it('renders the component correctly', () => {
-    const { getByText } = render(
+    render(
       <DataProvider>
         <DataInput />
       </DataProvider>
     );
 
- feature/sales-dashboard-foundation
     expect(screen.getByText('Import Data')).toBeInTheDocument();
     expect(screen.getByText('Upload your Excel or CSV file to get started.')).toBeInTheDocument();
     expect(screen.getByRole('button')).toBeInTheDocument();
@@ -52,17 +49,16 @@ describe('DataInput', () => {
       </DataProvider>
     );
 
-    // The input is visually hidden but present for userEvent
     const fileInput = screen.getByTestId('file-input');
     await user.upload(fileInput, file);
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /upload file/i }));
 
     // Allow FileReader to process
     await vi.waitFor(() => {
-      expect(mockSetData).toHaveBeenCalledTimes(1);
+      expect(mockSetRawData).toHaveBeenCalledTimes(1);
     });
 
-    const transformedData = mockSetData.mock.calls[0][0];
+    const transformedData = mockSetRawData.mock.calls[0][0];
 
     expect(transformedData).toHaveLength(1);
     expect(transformedData[0]).toEqual({
@@ -70,12 +66,5 @@ describe('DataInput', () => {
       Cost: '60',
       Date: '2023-01-15'
     });
-
-    // Check for the title
-    expect(getByText(/นำเข้าข้อมูลและบันทึกลง Supabase/)).toBeInTheDocument();
-
-    // Check for the instructional text
-    expect(getByText(/รองรับไฟล์: Excel/)).toBeInTheDocument();
- main
   });
 });
